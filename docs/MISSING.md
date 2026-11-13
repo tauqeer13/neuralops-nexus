@@ -2155,6 +2155,26 @@ capability wrapping tool execute (where the ApprovalGate already sits),
 or a harness-level setting if pydantic-ai grows one. Until built, each
 new fragile tool is a new way to kill a reply.
 
+## 11e. Binary files: personas can't save PNG/PDF into the project folder — NOT BUILT
+
+Found live 2026-11-12 (architect persona): asked for a diagram as
+PNG/PDF, it rendered both and delivered them as chat DOWNLOADS — but
+could not put them in the project folder, because the Files capability
+writes TEXT only. Its own words: "If you want the images in the folder,
+someone needs to save them from the downloads." So generated binaries
+(diagram exports, PDFs, spreadsheets, images) live only in the chat
+message and never join the project's files — the architecture/ record
+points at exports that exist somewhere else.
+
+Want: a road from generated binary → project folder. Options when
+ruled: (a) Files grows binary write (base64 or attachment-id source —
+NOT raw bytes through the model's context); (b) the engine saves a
+reply's download attachments into the project folder on request
+("save your exports under architecture/"), which keeps bytes out of
+the model entirely — the cleaner shape, same lesson as contextgraph's
+upload road; (c) the workbox (§12), whose shell writes any file kind
+natively — if §12 is ruled yes, this may come free.
+
 ## 12. Workbox — a separate docker for running tools (owner idea 2026-11-12, DECIDE IN THE MORNING)
 
 In plain words: one more container on the server, next to NeuralOps.
