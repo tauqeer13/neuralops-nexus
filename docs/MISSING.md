@@ -2140,3 +2140,29 @@ approve the push), select-code-→-ask-the-model, and editor HANDOFF
 ($EDITOR suspend/resume like git; never embed a terminal-in-terminal).
 Pure API consumer — auth token + REST + Centrifugo websocket; also the
 screenshot most likely to travel on X.
+
+## 12. Workbox — a separate docker for running tools (owner idea 2026-11-12, DECIDE IN THE MORNING)
+
+In plain words: one more container on the server, next to NeuralOps.
+Inside it: a shell, git, uvx, python — real dev tools. The SAME projects
+folder is mounted into it (shared, NOT moved — moving would break Files
+and the console). A small shell-MCP server runs inside it as the main
+process; the engine calls it over the internal docker network (HTTP +
+token). Every command a persona runs becomes a CHILD PROCESS INSIDE the
+workbox — it sees only the workbox's mounts, user, network and memory
+caps. No ssh and no docker exec on the same box; the ssh stdio road
+(1.1.7) is for a workbox on ANOTHER machine.
+
+Why: this is the sandbox the engine has been waiting for — production
+runs with shell OFF today ("not sandboxed yet", toolset_builder), and
+stdio tools currently spawn INSIDE the engine next to its secrets. With
+a workbox, personas get a real shell (git pull/push included) behind
+approval gates, and the engine stays clean.
+
+To decide in the morning:
+- build it at all? (lean yes — it also answers "how do personas pull/push")
+- one workbox for all projects (simple; same trust-zone rule as
+  contextgraph — the token reaches every mounted project) or one per
+  project (clean isolation, one small container each)?
+- Files stays the safe default tool; the workbox shell is ADDED for dev
+  personas, not a replacement.
