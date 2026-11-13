@@ -142,8 +142,12 @@ RUN go build -ldflags="-s -w -X 'github.com/centrifugal/centrifugo/v6/internal/b
 # ── Stage 4: final image ─────────────────────────────────────────────────────
 FROM python:3.13-slim-bookworm AS final
 
+# ripgrep: the Files capability's search_files uses rg when present; without
+# it the harness falls back to plain grep, whose directory handling broke a
+# live reply (found 2026-11-12 on Contabo — "grep: …: Is a directory" →
+# retries exhausted → the WHOLE reply died).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  ca-certificates libpq-dev curl nodejs npm git openssh-client && \
+  ca-certificates libpq-dev curl nodejs npm git openssh-client ripgrep && \
   rm -rf /var/lib/apt/lists/*
 
 # Filesystem MCP — installed globally at build time (not left to `npx` to
