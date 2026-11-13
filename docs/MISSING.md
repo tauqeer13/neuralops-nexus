@@ -2141,6 +2141,20 @@ approve the push), select-code-→-ask-the-model, and editor HANDOFF
 Pure API consumer — auth token + REST + Centrifugo websocket; also the
 screenshot most likely to travel on X.
 
+## 11d. Retry-exhaustion must never kill a reply (engine hardening) — NOT BUILT
+
+Twice in two days a single flaky tool call ended a WHOLE reply with
+"A tool the persona uses failed": web_fetch on a 403 site (2026-11-11,
+fixed specifically — _forgiving_web_fetch) and Files' search_files on
+the grep fallback with no ripgrep in the image (2026-11-12, fixed
+specifically — ripgrep now ships). The PATTERN remains: any tool whose
+ModelRetry crosses max_retries raises UnexpectedModelBehavior and the
+job dies. The general fix: catch retry exhaustion per tool call and
+hand the model a worded failure result so the run continues — likely a
+capability wrapping tool execute (where the ApprovalGate already sits),
+or a harness-level setting if pydantic-ai grows one. Until built, each
+new fragile tool is a new way to kill a reply.
+
 ## 12. Workbox — a separate docker for running tools (owner idea 2026-11-12, DECIDE IN THE MORNING)
 
 In plain words: one more container on the server, next to NeuralOps.
