@@ -2200,3 +2200,69 @@ To decide in the morning:
   project (clean isolation, one small container each)?
 - Files stays the safe default tool; the workbox shell is ADDED for dev
   personas, not a replacement.
+
+## 13. Recorded late — owner asks from Nov 12–13 that lived only in chat
+(The owner caught this 2026-11-13: "what i ask you to add in missing in
+last 10 days" was not all here. These four were designed/ruled in session
+and are now written down. None are built unless marked.)
+
+### 13a. contextgraph: the upload road + the engine sync tool — NOT BUILT
+Owner's ruling (2026-11-12): one project = its own contextgraph instance,
+USER-provisioned (any Docker host / RunPod); the product must take code by
+a CALLABLE road, not by mounts. Design settled in session:
+- contextgraph side: `POST /upload/<name>` behind the SAME Caddy door and
+  bearer token — receives a tar.gz, extracts to /data/repos/<name>,
+  triggers indexing; plus MCP tools list_sources / delete_source.
+- NeuralOps side: a native engine tool `sync_code_to_graph(server, path)`
+  — the ENGINE tars the project folder and streams it to the row's URL
+  with the row's stored bearer. Bytes never ride the model's context; the
+  model (or the CONSOLE — model-free, scriptable, cron-able) sends only
+  the small call and reads the one-line result.
+- Build requirements for GB-scale code (settled 2026-11-12): streaming end
+  to end (constant memory), no body cap on /upload at Caddy, indexing runs
+  ASYNC as a job (check_job_status exists), README capacity rule: disk ≈
+  3–4× the codebase. Full re-ship each sync — for huge repos synced often,
+  the git road (delta pulls) stays the smarter choice and the docs say so.
+- README addition still owed: "Getting your code in" — the three roads
+  (REPOS git URLs; INDEX_PATHS mounts — BUILT 2026-11-12; /upload).
+
+### 13b. Persona git pull/push — the ruled interim road + the real one — NOT BUILT
+The gap found live (BackendDev, 2026-11-12): mcp-server-git is local-only
+(no fetch/pull/push, by upstream design) and production has no shell, so
+"pull the latest / push your branch" is not sayable to a persona.
+- INTERIM (owner's pick, 2026-11-12: "we can later add uvx mcp-, which can
+  call git pull as shell command"): a uvx shell MCP row (e.g.
+  mcp-shell-server) with its allow-list pinned to `git` and its execute
+  tool set to ASK. Prereq: the stored PAT upgraded to Contents read-write
+  (today's is read-only — pulls work, pushes cannot).
+- PROPER (product answer): a small git-sync MCP with narrow verbs —
+  git_fetch / git_pull --ff-only / git_push (current branch, never force)
+  — gate-able per verb, fence-compatible, shipped in the repo for every
+  user. May be SUBSUMED by the workbox (§12): a sandboxed shell makes both
+  roads redundant.
+- Working agreement meanwhile: personas commit locally under their own
+  identity (e.g. "Backend Dev (NeuralOps persona)", own branch); a human
+  (or later a Release Manager persona holding the write credential) does
+  the push; PRs via the GitHub MCP. The RM persona concept (one persona
+  owns pushes, versions and releases across backend+frontend; dev personas
+  stay read-only at the credential level) is the owner's intended team
+  shape — record it as the default recommendation in docs when built.
+
+### 13c. Catalog tiles for the two shipped products — NOT BUILT
+Owner (2026-11-12): "we need to add these instructions either in that mcp
+or somewhere else in neuralops." The §10 "deployable tile" design question
+now has TWO live products waiting on it: **contextgraph** (public,
+Apache-2.0) and **csv-mcp** (flip public first). A deployable tile = an
+ordinary catalog tile + the one-command install shown on the card
+(`git clone … && ./install.sh`) + URL/token fields instead of a Connect
+button (transport and auth prefilled). One mcp_catalog.py commit covers
+both; frontend copy-button polish optional.
+
+### 13d. contextgraph v2: per-token repo scoping — NOT BUILT
+One instance = one token = every indexed repo visible to any caller, so
+today's rule (documented, 2026-11-12) is ONE INSTANCE PER TRUST ZONE: all
+the owner's projects may share one; a customer gets their own (one
+install.sh elsewhere). v2, before shared hosting is ever sold: multiple
+tokens, each scoped to named sources (the allowed_repos idea applied at
+contextgraph's door), enforced in Caddy or a thin auth layer in front of
+mcp-proxy.
