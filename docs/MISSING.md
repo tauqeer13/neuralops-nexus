@@ -2266,3 +2266,15 @@ install.sh elsewhere). v2, before shared hosting is ever sold: multiple
 tokens, each scoped to named sources (the allowed_repos idea applied at
 contextgraph's door), enforced in Caddy or a thin auth layer in front of
 mcp-proxy.
+
+---
+
+## 14. Web app: follow-ups from the 2026-11-15 review passes — NOT BUILT
+
+Found while shipping web-app PRs #9 (the sign-in screen says what happened) and #10 (a persona's reply is hidden until it lands). None blocks a release. Each is small and has its place named. Five items (a sixth, a marker glued to a lead block, was fixed in #10 before this landed).
+
+- **14a. The working cue's clock counts from the reply's start.** WHERE: `message-item.tsx`, `WorkingCue` reads `createdAt`. A reply that resumes after a long pause (a question or approval answered an hour later) shows the whole wait, or no clock at all past an hour. HOW BIG: a resume timestamp in the message store, set on the first delta after a pause, and the cue reading it. Half a day.
+- **14b. A paused reply still shows its file chips and the "Answered by" line.** WHERE: `message-item.tsx`, both gated on `!isStreaming` only, while the hover row is also gated on paused. Nothing streamed shows, it is only inconsistent. HOW BIG: two conditions and a test. An hour.
+- **14c. The sign-in notice mounts together with its text.** WHERE: `src/components/auth/login-form.tsx`, the `role="status"` notice. A live region that appears with its content is often not announced, so "Sent again" after a resend can go unheard. The resend offer next to it already uses a region that is mounted from the first render. HOW BIG: the same treatment for the notice. An hour.
+- **14d. Switching the form mode during a resend lands the result under the new form.** WHERE: `login-form.tsx`, `resendConfirmation` awaits the provider and then sets the notice or the error, whatever form is showing by then. HOW BIG: drop a late result when the mode changed (a ref compared after the await). An hour.
+- **14e. A `message_error` with no content would show the streamed partial in the error bubble.** WHERE: `src/lib/realtime/message-store.ts`, the error case keeps `target.content` when the event carries none. Unreachable today: every nucleus publisher sends content. HOW BIG: clear the partial on error, one store test. Minutes.
